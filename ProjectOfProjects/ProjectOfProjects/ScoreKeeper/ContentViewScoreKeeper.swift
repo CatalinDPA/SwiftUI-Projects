@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct ContentViewScoreKeeper: View {
-    @State private var scoreboard = Scoreboard()
+    @ObservedObject private var scoreboard = Scoreboard()
     @State private var startingPoints = 0
-    
     var body: some View {
             Text("Score Keeper")
                 .font(.title)
@@ -20,8 +19,7 @@ struct ContentViewScoreKeeper: View {
             startingPoints: $startingPoints,
             doesHighestScoreWin: $scoreboard
                 .doesHighestScoreWin, winningPoints: $scoreboard.winningPoints, rounds: $scoreboard.rounds)
-        .disabled(scoreboard.state != .setup)
-            
+        .disabled(scoreboard.rounds > 0)
         NavigationStack {
             HStack {
                 Text("Player")
@@ -29,28 +27,39 @@ struct ContentViewScoreKeeper: View {
                 Text("Score")
             }
             .font(.headline)
-            .frame(maxWidth: 180)
+            .frame(maxWidth: 240)
+            
+            Text("Rounds left: \(scoreboard.rounds)")
+                .opacity(scoreboard.rounds > 0 ? 1 : 0)
+                .onChange(of: scoreboard.rounds) {
+                    if scoreboard.rounds == 0  {
+                        for player in scoreboard.players {
+                            player.wins = 0
+                        }
+                    }
+                }
             List {
-                ForEach($scoreboard.players) { $player in
+                ForEach($scoreboard.players, id: \.id) { $player in
                     HStack {
                         HStack {
-                            if scoreboard.winners.contains(player) {
-                                withAnimation (.easeIn(duration: 2)) {
+                            if player.winner {
                                     Image(systemName: "crown.fill")
                                         .foregroundColor(.yellow)
                                 }
-                            }
                             TextField("name", text: $player.name)
                                 .padding(4)
                                 .id(player.id)
                                 .bold()
                             .disabled(scoreboard.state != .setup)
+                            Text("Wins: \(player.wins)")
                         }
+                        .padding(.leading, 4)
+                        .padding(.trailing, 8)
                         .background{
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(player.color)
                         }
-                        Text("Wins \(scoreboard.winners.contains(player) ? player.wins+1 : player.wins)")
+
                         Text("\(player.score)")
                             .frame(width: 30)
                             .opacity(scoreboard.state == .setup ? 0 : 1.0)
@@ -61,6 +70,9 @@ struct ContentViewScoreKeeper: View {
                         }
                         .labelsHidden()
                         .opacity(scoreboard.state == .setup ? 0 : 1.0)
+                        .onChange(of: player.score, {
+                            scoreboard.playerWon()
+                        })
                     }
                 }
                 .onMove(perform: move)
@@ -68,7 +80,7 @@ struct ContentViewScoreKeeper: View {
             .toolbar {
                 if scoreboard.state == .setup {
                     Button("Add player", systemImage: "plus") {
-                        scoreboard.players.append(Player(name:"", score: 0, wins: 0))
+                        scoreboard.players.append(Player(name:"", score: 0,winner: false, wins: 0))
                     }
                     EditButton()
                 }
@@ -80,13 +92,16 @@ struct ContentViewScoreKeeper: View {
                             scoreboard.state = .playing
                             scoreboard.resetScores(to: startingPoints)
                         }
+                        .disabled(scoreboard.rounds == 0)
                     case .playing:
                         Button("End game", systemImage: "stop.fill") {
                             scoreboard.state = .gameOver
+                            scoreboard.winners()
                         }
                     case .gameOver:
                         Button("New game", systemImage: "arrow.counterclockwise") {
                             scoreboard.state = .setup
+                            scoreboard.rounds -= 1
                         }
                 }
             }
@@ -95,13 +110,114 @@ struct ContentViewScoreKeeper: View {
                 .controlSize(.large)
                 .tint(.blue)
         }
-        
+        .scrollDisabled(scoreboard.players.count < 4)
     }
-    
     func move(from: IndexSet, to: Int) {
         scoreboard.players.move(fromOffsets: from, toOffset: to)
     }
 }
+
+/*struct PlayerListView: View {
+    @State var scoreboard: Scoreboard
+    @Binding var startingPoints: Int
+    
+    var body: some View {
+        NavigationStack {
+            HStack {
+                Text("Player")
+                Spacer()
+                Text("Score")
+            }
+            .font(.headline)
+            .frame(maxWidth: 240)
+            
+            Text("Rounds left: \(scoreboard.rounds)")
+                .opacity(scoreboard.rounds > 0 ? 1 : 0)
+                .onChange(of: scoreboard.rounds) {
+                    if scoreboard.rounds == 0  {
+                        for player in scoreboard.players {
+                            player.wins = 0
+                        }
+                    }
+                }
+            List {
+                ForEach($scoreboard.players, id: \.id) { $player in
+                    HStack {
+                        HStack {
+                            if player.winner {
+                                    Image(systemName: "crown.fill")
+                                        .foregroundColor(.yellow)
+                                }
+                            TextField("name", text: $player.name)
+                                .padding(4)
+                                .id(player.id)
+                                .bold()
+                            .disabled(scoreboard.state != .setup)
+                            Text("Wins: \(player.wins)")
+                        }
+                        .padding(.leading, 4)
+                        .padding(.trailing, 8)
+                        .background{
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(player.color)
+                        }
+
+                        Text("\(player.score)")
+                            .frame(width: 30)
+                            .opacity(scoreboard.state == .setup ? 0 : 1.0)
+                        Stepper(
+                            value: $player.score,
+                            in: 0...scoreboard.winningPoints) {
+                            Text("\(player.score)")
+                        }
+                        .labelsHidden()
+                        .opacity(scoreboard.state == .setup ? 0 : 1.0)
+                        .onChange(of: player.score, {
+                            scoreboard.playerWon()
+                        })
+                    }
+                }
+                .onMove(perform: move)
+            }
+            .toolbar {
+                if scoreboard.state == .setup {
+                    Button("Add player", systemImage: "plus") {
+                        scoreboard.players.append(Player(name:"", score: 0,winner: false, wins: 0))
+                    }
+                    EditButton()
+                }
+            }
+            HStack {
+                switch scoreboard.state {
+                    case .setup:
+                        Button("Start game", systemImage: "play.fill") {
+                            scoreboard.state = .playing
+                            scoreboard.resetScores(to: startingPoints)
+                        }
+                        .disabled(scoreboard.rounds == 0)
+                    case .playing:
+                        Button("End game", systemImage: "stop.fill") {
+                            scoreboard.state = .gameOver
+                            scoreboard.winners()
+                        }
+                    case .gameOver:
+                        Button("New game", systemImage: "arrow.counterclockwise") {
+                            scoreboard.state = .setup
+                            scoreboard.rounds -= 1
+                        }
+                }
+            }
+            .buttonStyle(.bordered)
+            .buttonBorderShape(.capsule)
+                .controlSize(.large)
+                .tint(.blue)
+        }
+        .scrollDisabled(scoreboard.players.count < 4)
+    }
+    func move(from: IndexSet, to: Int) {
+        scoreboard.players.move(fromOffsets: from, toOffset: to)
+    }
+}*/
 
 #Preview {
     ContentViewScoreKeeper()

@@ -13,7 +13,6 @@ struct TitleView: View {
     var body: some View {
         VStack {
             Image(systemName: systemName)
-                
             
             Text(title)
                 .font(.title)

@@ -48,6 +48,8 @@ struct SettingsViewScoreKeeper: View {
             }
             Text("Total rounds")
             Picker("Total rounds", selection: $rounds) {
+                Text("Select one")
+                    .tag(0)
                 Text("1 round")
                     .tag(1)
                 Text("2 rounds")
