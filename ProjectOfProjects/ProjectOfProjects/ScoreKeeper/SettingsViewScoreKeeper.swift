@@ -56,6 +56,8 @@ struct SettingsViewScoreKeeper: View {
                     .tag(2)
                 Text("3 rounds")
                     .tag(3)
+                Text("4 rounds")
+                    .tag(4)
                 Text("5 rounds")
                     .tag(5)
             }

@@ -10,7 +10,6 @@ import SwiftUI
 internal import Combine
 
 class Scoreboard: ObservableObject {
-
     @Published var players: [Player] = [
         Player(name: "Cristiano", score: 0,winner: false, wins: 0),
         Player(name: "Messi", score: 0,winner: false, wins: 0),
@@ -33,7 +32,10 @@ class Scoreboard: ObservableObject {
         guard state == .playing else {return}
         for player in players {
             if player.score == winningPoints && winningPoints != 0 {
-                DispatchQueue.main.async { //Hace que se ejecute cuando el calculo de la vista (renderizado) termina
+                /*DispatchQueue.main.async { //Hace que se ejecute cuando el calculo de la vista (renderizado) termina
+                    self.state = .gameOver
+                }*/
+                Task { @MainActor in
                     self.state = .gameOver
                 }
                 player.changeWinner()

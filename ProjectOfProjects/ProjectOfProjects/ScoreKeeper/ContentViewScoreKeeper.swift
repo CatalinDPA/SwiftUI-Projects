@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  ScoreKeeper
-//
-//  Created by Catalin Posedaru on 10/11/25.
-//
-
 import SwiftUI
 
 struct ContentViewScoreKeeper: View {
@@ -23,11 +16,14 @@ struct ContentViewScoreKeeper: View {
         NavigationStack {
             HStack {
                 Text("Player")
-                Spacer()
-                Text("Score")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                if !(scoreboard.state == .setup) {
+                    Text("Score")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .transition(.move(edge: .trailing))
+                }
             }
             .font(.headline)
-            .frame(maxWidth: 240)
             
             Text("Rounds left: \(scoreboard.rounds)")
                 .opacity(scoreboard.rounds > 0 ? 1 : 0)
@@ -45,6 +41,7 @@ struct ContentViewScoreKeeper: View {
                             if player.winner {
                                     Image(systemName: "crown.fill")
                                         .foregroundColor(.yellow)
+                                        .transition(.move(edge: .leading))
                                 }
                             TextField("name", text: $player.name)
                                 .padding(4)
@@ -59,20 +56,22 @@ struct ContentViewScoreKeeper: View {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(player.color)
                         }
-
-                        Text("\(player.score)")
-                            .frame(width: 30)
-                            .opacity(scoreboard.state == .setup ? 0 : 1.0)
-                        Stepper(
-                            value: $player.score,
-                            in: 0...scoreboard.winningPoints) {
+                        if !(scoreboard.state == .setup) {
                             Text("\(player.score)")
+                                .frame(width: 30)
+                                .transition(.move(edge: .trailing))
+                            Stepper(
+                                value: $player.score,
+                                in: 0...scoreboard.winningPoints) {
+                                    Text("\(player.score)")
+                                }
+                                .labelsHidden()
+                                .onChange(of: player.score, {
+                                    scoreboard.playerWon()
+                                })
+                                .transition(.move(edge: .trailing))
                         }
-                        .labelsHidden()
-                        .opacity(scoreboard.state == .setup ? 0 : 1.0)
-                        .onChange(of: player.score, {
-                            scoreboard.playerWon()
-                        })
+                            
                     }
                 }
                 .onMove(perform: move)
@@ -89,19 +88,25 @@ struct ContentViewScoreKeeper: View {
                 switch scoreboard.state {
                     case .setup:
                         Button("Start game", systemImage: "play.fill") {
-                            scoreboard.state = .playing
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                scoreboard.state = .playing
+                            }
                             scoreboard.resetScores(to: startingPoints)
                         }
                         .disabled(scoreboard.rounds == 0)
                     case .playing:
                         Button("End game", systemImage: "stop.fill") {
-                            scoreboard.state = .gameOver
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                scoreboard.state = .gameOver
+                            }
                             scoreboard.winners()
                         }
                     case .gameOver:
                         Button("New game", systemImage: "arrow.counterclockwise") {
-                            scoreboard.state = .setup
-                            scoreboard.rounds -= 1
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                scoreboard.state = .setup
+                                scoreboard.rounds -= 1
+                            }
                         }
                 }
             }
