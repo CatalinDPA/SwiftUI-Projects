@@ -6,18 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainContentView: View {
     var body: some View {
         NavigationStack {
             TitleView(
                 systemName: "list.bullet.rectangle.fill",
-                title: "Project List"
+                title: "Project List",
+                titleColor: .white,
+                backColor: .white,
+
             )
             .font(.system(size: 50))
             .frame(maxWidth: .infinity)
             .background(Color.deepNavy)
-            .foregroundColor(.white)
             ScrollView (.vertical) {
                 ItemListView()
             }
@@ -48,11 +51,12 @@ struct ItemListView: View {
                     .foregroundColor(.white)
                     .bold()
                     .shadow(radius: 4)
-            }
-            .frame(maxWidth: .infinity)
-            .buttonStyle(.plain)
-            .padding(.top, 6)
+                }
+                .frame(maxWidth: .infinity)
+                .buttonStyle(.plain)
+                .padding(.top, 6)
         }
-        .padding()
+
     }
 }
+

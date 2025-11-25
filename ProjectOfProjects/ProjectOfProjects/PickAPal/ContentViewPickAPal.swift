@@ -6,21 +6,28 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentViewPickAPal: View {
-    @State private var names: [String] = [ ]
+    @Environment(\.modelContext) private var context
+    @Query private var pals: [Pal]
+
     @State private var nameToAdd = ""
     @State private var pickedName = ""
     @State private var shouldRemovePickedname = false
-    @State private var nameSaves: [String] = []
+    @State private var savedPals: [Pal] = []
     @State private var warning: String = ""
     
     var body: some View {
         VStack {
             VStack (spacing: 8) {
-                TitleView(systemName: "person.3.sequence.fill", title: "Pick-a-Pal")
+                TitleView(
+                    systemName: "person.3.sequence.fill",
+                    title: "Pick-a-Pal",
+                    titleColor: Color.accentColor,
+                    backColor: Color.accentColor
+                )
             }
-            .foregroundStyle(.tint)
             .symbolRenderingMode(.hierarchical)
             .font(.title)
             .bold()
@@ -32,8 +39,8 @@ struct ContentViewPickAPal: View {
                 .foregroundStyle(.tint)
             
             List {
-                ForEach(names, id: \.description) { name in
-                    Text(name)
+                ForEach(pals) { pal in
+                    Text(pal.name)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -46,10 +53,10 @@ struct ContentViewPickAPal: View {
                 .autocorrectionDisabled()
                 .onSubmit {
                     warning = ""
-                    if !nameToAdd.isEmpty && !names.contains(nameToAdd){
+                    if !nameToAdd.isEmpty && !pals.contains(Pal(name: nameToAdd)){
                         nameToAdd = nameToAdd
                             .trimmingCharacters(in: .whitespacesAndNewlines)
-                        names.append(nameToAdd)
+                        context.insert(Pal(name: nameToAdd))
                         nameToAdd = ""
                     } else {
                         if nameToAdd.isEmpty {
@@ -63,12 +70,10 @@ struct ContentViewPickAPal: View {
             
             Toggle("Remove when picked", isOn: $shouldRemovePickedname)
             Button {
-                if let randomName = names.randomElement() {
-                    pickedName = randomName
+                if let randomPal = pals.randomElement() {
+                    pickedName = randomPal.name
                     if shouldRemovePickedname {
-                        names.removeAll { name in
-                        (name == randomName)
-                        }
+                        context.delete(randomPal)
                     }
                 } else {
                     warning = "No name to pick"
@@ -85,9 +90,13 @@ struct ContentViewPickAPal: View {
             
             HStack {
                 Button {
-                    if !names.isEmpty {
-                        nameSaves = names
-                        names = []
+                    if !pals.isEmpty {
+                        for pal in pals {
+                            savedPals.append(pal)
+                        }
+                        for pal in pals {
+                            context.delete(pal)
+                        }
                         warning = ""
                     } else {
                         warning = "Nothing to save"
@@ -100,11 +109,13 @@ struct ContentViewPickAPal: View {
                     .buttonBorderShape(.roundedRectangle)
                     .buttonStyle(.borderedProminent)
                 Button {
-                    if nameSaves.isEmpty {
+                    if savedPals.isEmpty {
                         warning = "Nothing to load"
                     } else {
                         warning = ""
-                        names = nameSaves
+                        for pal in savedPals {
+                            context.insert(pal)
+                        }
                     }
                 } label: {
                         Text("Load list")
@@ -126,4 +137,5 @@ struct ContentViewPickAPal: View {
 
 #Preview {
     ContentViewPickAPal()
+        .modelContainer(for: Pal.self)
 }

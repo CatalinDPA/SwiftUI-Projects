@@ -10,18 +10,19 @@ import SwiftUI
 struct TitleView: View {
     var systemName: String
     var title: String
+    var titleColor: Color?
+    var backColor: Color?
     var body: some View {
         VStack {
             Image(systemName: systemName)
-            
+                .foregroundColor(backColor != nil ? backColor : .black)
+
             Text(title)
                 .font(.title)
                 .bold()
                 .padding(.bottom, 16)
+                .foregroundColor(titleColor != nil ? titleColor : .black)
         }
     }
 }
 
-#Preview {
-    TitleView(systemName: "list.bullet.rectangle.fill", title: "Project list")
-}

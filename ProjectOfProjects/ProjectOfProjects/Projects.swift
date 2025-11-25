@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 enum Projects: CaseIterable {
     case diceRoller
@@ -6,7 +7,8 @@ enum Projects: CaseIterable {
     case chatPrototype
     case pickAPal
     case scoreKeeper
-    
+    case birthdays
+
     var title: String {
         switch self {
         case .diceRoller:
@@ -19,13 +21,15 @@ enum Projects: CaseIterable {
             return "Pick-a-Pal"
         case .scoreKeeper: 
             return "Score Keeper"
+        case .birthdays:
+            return "Birthdays list"
         }
     }
     
     var navigationView: some View {
         switch self {
         case .diceRoller:
-            return AnyView(ContentViewDice())
+            return AnyView(ContentViewPickAPal())
         case .addressLabel:
             return AnyView(ContentViewAddressLabel())
         case .chatPrototype:
@@ -34,6 +38,8 @@ enum Projects: CaseIterable {
             return AnyView(ContentViewPickAPal())
         case .scoreKeeper:
             return AnyView(ContentViewScoreKeeper())
+        case .birthdays:
+            return AnyView(ContentViewBirthdays())
         }
     }
 }
