@@ -13,7 +13,7 @@ struct ProjectOfProjectsApp: App {
     var body: some Scene {
         WindowGroup {
             MainContentView()
-                .modelContainer(Data.shared.modelContainer)
+                .modelContainer(for: [Friend.self, Pal.self, Grocery.self])
         }
     }
 }

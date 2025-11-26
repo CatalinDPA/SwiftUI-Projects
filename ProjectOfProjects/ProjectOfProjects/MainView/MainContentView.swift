@@ -16,16 +16,17 @@ struct MainContentView: View {
                 title: "Project List",
                 titleColor: .white,
                 backColor: .white,
-
             )
+            .padding(8)
             .font(.system(size: 50))
             .frame(maxWidth: .infinity)
             .background(Color.deepNavy)
+
             ScrollView (.vertical) {
                 ItemListView()
             }
+            .background(.white)
             .font(.system(size: 22))
-            .background(Color.softGray)
             .cornerRadius(8)
             .ignoresSafeArea(.all)
         }
@@ -48,15 +49,15 @@ struct ItemListView: View {
                     .padding(4)
                     .background(Color.listItem)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .foregroundColor(.white)
+                    .foregroundColor(.softGray)
                     .bold()
                     .shadow(radius: 4)
                 }
                 .frame(maxWidth: .infinity)
                 .buttonStyle(.plain)
-                .padding(.top, 6)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 4)
         }
-
     }
 }
 

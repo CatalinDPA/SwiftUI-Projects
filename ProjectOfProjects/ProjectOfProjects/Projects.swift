@@ -8,6 +8,7 @@ enum Projects: CaseIterable {
     case pickAPal
     case scoreKeeper
     case birthdays
+    case groceryList
 
     var title: String {
         switch self {
@@ -23,13 +24,15 @@ enum Projects: CaseIterable {
             return "Score Keeper"
         case .birthdays:
             return "Birthdays list"
+        case .groceryList:
+            return "Grocery list"
         }
     }
     
     var navigationView: some View {
         switch self {
         case .diceRoller:
-            return AnyView(ContentViewPickAPal())
+            return AnyView(ContentViewDice())
         case .addressLabel:
             return AnyView(ContentViewAddressLabel())
         case .chatPrototype:
@@ -40,6 +43,8 @@ enum Projects: CaseIterable {
             return AnyView(ContentViewScoreKeeper())
         case .birthdays:
             return AnyView(ContentViewBirthdays())
+        case .groceryList:
+            return AnyView(ContentViewGrocery())
         }
     }
 }

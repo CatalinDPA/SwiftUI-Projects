@@ -16,6 +16,7 @@ struct TitleView: View {
         VStack {
             Image(systemName: systemName)
                 .foregroundColor(backColor != nil ? backColor : .black)
+                .font(.title)
 
             Text(title)
                 .font(.title)
