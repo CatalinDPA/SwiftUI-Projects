@@ -43,6 +43,7 @@ struct ContentViewPickAPal: View {
                     Text(pal.name)
                 }
             }
+            .scrollDisabled(pals.count < 6)
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             Divider()

@@ -10,12 +10,19 @@ import SwiftData
 
 struct ContentViewBirthdays: View {
     @Query(sort:\Friend.name) private var friends: [Friend]
-    @Environment(\.modelContext) private var context //Provee el contexto entre 
-    
+    @Environment(\.modelContext) private var context //Provee el contexto entre
+
     @State private var newName = ""
     @State private var newDate = Date.now
     @State private var notes = ""
-    
+    @State private var newFriend: Friend?
+
+    private func addFriend() {
+        let newFriend = Friend(name:"", birthday: .now, notes: "")
+        context.insert(newFriend)
+        self.newFriend = newFriend
+    }
+
     var body: some View {
         VStack {
             NavigationStack {
@@ -45,34 +52,22 @@ struct ContentViewBirthdays: View {
                         .foregroundColor(.red)
                     }
                 }
+                .toolbar {
+                    ToolbarItem {
+                        Button("Add friend", action: addFriend)
+                    }
+                }
+                .sheet(item: $newFriend) { friend in
+                    NavigationStack {
+                        BirthdayDetail(
+                            friend: friend
+                        )
+                        .interactiveDismissDisabled(true)
+                    }
+                }
+
             }
             .navigationTitle("Birthdays")
-            .safeAreaInset(edge: .bottom) {
-                VStack(alignment: .center, spacing: 20) {
-                    Text("New birthday")
-                        .font(.headline)
-                    DatePicker(
-                        selection: $newDate,
-                        in: Date.distantPast...Date.now,
-                        displayedComponents: .date
-                    ) {
-                        TextField("Name", text: $newName)
-                            .textFieldStyle(.roundedBorder)
-                        TextField("Note", text: $notes)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                    Button("Save") {
-                        let newFriend = Friend(name: newName, birthday: newDate, notes: notes)
-                        context.insert(newFriend)
-                        newName = ""
-                        newDate = Date.now
-                    }
-                    .disabled(newName.isEmpty)
-                    .bold()
-                }
-                .padding()
-                .background(.bar)
-            }
         }
     }
 }
