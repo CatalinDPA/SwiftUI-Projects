@@ -12,6 +12,12 @@ class Movie {
         self.releaseDate = releaseDate
     }
 
+    public static func addMovie(newMovie: Movie?, context:ModelContext) {
+        if let movie = newMovie {
+            context.insert(movie)
+        }
+    }
+
     static let sampleData = [
             Movie(title: "Amusing Space Traveler 3",
                   releaseDate: Date(timeIntervalSinceReferenceDate: -402_000_000)),

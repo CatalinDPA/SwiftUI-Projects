@@ -35,6 +35,7 @@ struct FriendDetail: View {
             if isNew {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
+                        MovieFriend.addFriend(newFriend: friend, context: context)
                         dismiss()
                     }
                 }

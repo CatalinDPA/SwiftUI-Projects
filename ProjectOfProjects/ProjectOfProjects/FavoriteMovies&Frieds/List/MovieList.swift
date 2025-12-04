@@ -2,14 +2,18 @@ import SwiftUI
 import SwiftData
 
 struct MovieList: View {
-    @Query(sort: \Movie.title) private var movies: [Movie]
+    @Query private var movies: [Movie]
     @Environment(\.modelContext) private var context
-    @State private var newMovie: Movie?
+    @Binding private var newMovie: Movie?
 
-    private func addMovie() {
-        let newMovie = Movie(title: "", releaseDate: .now)
-        context.insert(newMovie)
-        self.newMovie = newMovie
+    init(newMovie: Binding<Movie?>, titleFilter: String = "") {
+        self._newMovie = newMovie
+        let predicate = #Predicate<Movie> { movie in
+            titleFilter.isEmpty || movie.title
+                .localizedStandardContains(titleFilter)
+        }
+
+        _movies = Query(filter:predicate, sort: \Movie.title)
     }
 
     private func deleteMovie(indexes: IndexSet) {
@@ -19,39 +23,27 @@ struct MovieList: View {
     }
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(movies) { movie in
-                    NavigationLink(movie.title) {
-                        MovieDetail(movie: movie)
+        Group {
+            if !movies.isEmpty {
+                List {
+                    ForEach(movies, id: \.title) { movie in
+                        NavigationLink(movie.title) {
+                            MovieDetail(movie: movie)
+                        }
                     }
+                    .onDelete(perform:  deleteMovie(indexes:))
+
                 }
-                .onDelete(perform:  deleteMovie(indexes:))
+            } else {
+                ContentUnavailableView("Add Movies", systemImage: "film.stack")
             }
-            .navigationTitle("Movies")
-            .toolbar {
-                ToolbarItem {
-                    Button("Add movie", systemImage: "plus", action: addMovie)
-                }
-                ToolbarItem (placement: .topBarTrailing) {
-                    EditButton()
-                }
+        }
+        .navigationTitle("Movies")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $newMovie) { movie in
+            NavigationStack {
+                MovieDetail(movie: movie, isNew: true)
             }
-            .sheet(item: $newMovie) { movie in
-                NavigationStack {
-                    MovieDetail(movie: movie, isNew: true)
-                        .interactiveDismissDisabled()
-                }
-            }
-        } detail: {
-            Text("Select a movie")
-                .navigationTitle("Movie")
-                .navigationBarTitleDisplayMode(.inline)
         }
     }
-}
-
-#Preview {
-    MovieList()
-        .modelContainer(for: [Movie.self, MovieFriend.self])
 }

@@ -43,6 +43,8 @@ struct MovieDetail: View {
             if isNew {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
+                        Movie.addMovie(newMovie: movie, context: context)
+
                         dismiss()
                     }
                 }

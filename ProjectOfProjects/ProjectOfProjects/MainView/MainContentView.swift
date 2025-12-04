@@ -12,9 +12,10 @@ struct MainContentView: View {
     var body: some View {
         NavigationStack {
             ZStack (alignment: .top) {
-                RoundedRectangle(cornerRadius: 50)
+                RoundedRectangle(cornerRadius: 60)
                     .stroke(.white, lineWidth: 4)
-                    .padding(6)
+                    .padding(.horizontal, 2)
+                    .padding(.vertical, 4)
                     .ignoresSafeArea()
                     .zIndex(10)
                 MainVStack()
@@ -71,9 +72,10 @@ struct MainVStack: View {
             .background(Color.deepNavy)
             .frame(minHeight: 90)
 
-
-            ScrollView (.vertical) {
-                ItemListView()
+            NavigationStack {
+                ScrollView (.vertical) {
+                        ItemListView()
+                }
             }
             .scrollDisabled(Projects.allCases.count < 10)
             .padding(12)

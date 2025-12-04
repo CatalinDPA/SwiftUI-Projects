@@ -3,55 +3,55 @@ import SwiftData
 
 struct FriendList: View {
     @Query(sort: \MovieFriend.name) private var friends: [MovieFriend]
+    @Binding var newFriend: MovieFriend?
     @Environment(\.modelContext) private var context
-    @State private var newFriend: MovieFriend?
 
-    private func addFriend() {
-        let newFriend = MovieFriend(name:"")
-        context.insert(newFriend)
-        self.newFriend = newFriend
-    }
-
-    private func deleteFriend(indexes: IndexSet) {
+    func deleteFriend(indexes: IndexSet) {
         for index in indexes {
             context.delete(friends[index])
         }
     }
+    func deleteFriend(friend: MovieFriend) {
+        context.delete(friend)
+    }
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(friends) { friend in
-                    NavigationLink(friend.name) {
-                        FriendDetail(friend: friend)
+            Group {
+                if !friends.isEmpty {
+                    List {
+                        ForEach(friends, id: \.name) { friend in
+                            NavigationLink(friend.name) {
+                                FriendDetail(friend: friend)
+                            }
+                        }
+                        .onDelete(perform: deleteFriend(indexes:))
+                    }
+                } else {
+                    ContentUnavailableView("Add Friends", systemImage: "person.and.person")
+                }
+            }
+            .sheet(
+                item: $newFriend,
+                onDismiss: {
+                    if let friend = newFriend {
+                        deleteFriend(friend: friend )
                     }
                 }
-                .onDelete(perform: deleteFriend(indexes:))
-            }
-            .navigationTitle("Friends")
-            .toolbar {
-                ToolbarItem {
-                    Button("Add friend", systemImage: "plus", action: addFriend)
-                }
-                ToolbarItem (placement: .topBarTrailing) {
-                    EditButton()
-                }
-            }
-            .sheet(item: $newFriend) { friend in
+            ) { friend in
                 NavigationStack {
                     FriendDetail(friend: friend, isNew: true)
-                        .interactiveDismissDisabled()
                 }
             }
-        } detail: {
-            Text("Select a friend")
-                .navigationTitle("Friend")
-                .navigationBarTitleDisplayMode(.inline)
-        }
+
     }
 }
 
-#Preview {
+/*#Preview {
     FriendList()
         .modelContainer(SampleData.shared.modelContainer)
 }
+
+#Preview("Empty") {
+    FriendList()
+        .modelContainer(for: MovieFriend.self, inMemory: true)
+}*/
