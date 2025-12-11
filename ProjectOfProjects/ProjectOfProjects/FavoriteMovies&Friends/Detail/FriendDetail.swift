@@ -28,6 +28,7 @@ struct FriendDetail: View {
                         .tag(movie)
                 }
             }
+            .pickerStyle(.navigationLink)
         }
         .navigationTitle(isNew ? "New Friend" : "Friend")
         .navigationBarTitleDisplayMode(.inline)
@@ -35,7 +36,6 @@ struct FriendDetail: View {
             if isNew {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        MovieFriend.addFriend(newFriend: friend, context: context)
                         dismiss()
                     }
                 }

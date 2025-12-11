@@ -6,16 +6,11 @@ class Movie {
     var title: String
     var releaseDate: Date
     var favoritedBy = [MovieFriend]()
+    var movieCast = [Cast]()
 
     init(title: String, releaseDate: Date) {
         self.title = title
         self.releaseDate = releaseDate
-    }
-
-    public static func addMovie(newMovie: Movie?, context:ModelContext) {
-        if let movie = newMovie {
-            context.insert(movie)
-        }
     }
 
     static let sampleData = [
