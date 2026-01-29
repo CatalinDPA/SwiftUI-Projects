@@ -38,6 +38,7 @@ struct FriendList: View {
                             }
                         }
                         .onDelete(perform: deleteFriend(indexes:))
+                        .background(.white)
                     }
                     
                 } else {
